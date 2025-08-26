@@ -13,7 +13,7 @@ const Message = ({ message }) => {
   return (
     <div>
       {message.role === 'user' ? (
-        <div className='flext items-start justify-end my-4 gap-2'>
+        <div className='flex items-start justify-end my-4 gap-2'>
           <div className='flex flex-col p-2 gap-2 px-4 bg-slate-50 dark:bg-[#57317C]/30 border border-[#80609F] rounded-md max-w-2xl'>
             <p className='text-sm dark:text-primary'>{message.content}</p>
             <span className='text-xs test-gray-400 dark:text-[#B1A6C0]'>{moment(message.timestamp).fromNow()}</span>
@@ -29,9 +29,10 @@ const Message = ({ message }) => {
           :(
             <div className='text-sm dark:text-primary reset-tw'> <Markdown>{message.content}</Markdown></div>
           )}
+           <span className='text-xs test-gray-400 dark:text-[#B1A6C0]'>{moment(message.timestamp).fromNow()}</span>
           </div>
         )}
-        <span>{moment(message.timestamp).fromNow()}</span>
+       
     </div>
   )
 }

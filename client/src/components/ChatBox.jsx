@@ -2,20 +2,51 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import Message from '../components/Message'
+import toast from 'react-hot-toast'
 
 const ChatBox = () => {
 
-  const { selectedChat, theme } = useAppContext()
+  const { selectedChat, theme, user, setUser, axios, token } = useAppContext()
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
-  const [promt, setPromt] = useState('')
+  const [prompt, setPrompt] = useState('')
   const [mode, setMode] = useState('text')
   const [isPublished, setIsPublished] = useState(false)
 
   const containerRef = useRef(null)
 
   const onSubmitHandler = async (e) => {
-    e.preventDefault();
+
+    try {
+      e.preventDefault();
+      if (!user) return toast("login to send message")
+      setLoading(true)
+
+      const promptCopy = prompt
+      setPrompt('')
+      setMessages(prev => [...prev, { role: 'user', content: prompt, timestamp: Date.now(), isImage: false }])
+
+      const { data } = await axios.post(`/api/message/${mode}`, { chatId: selectedChat._id, prompt, isPublished }, { headers: { AUthorization: token } })
+
+      if (data.success) {
+        setMessages(prev => [...prev, data.reply])
+        // deduct credits
+        if (mode === 'image') {
+          setUser(prev => ({ ...prev, credits: prev.credits - 2 }))
+        } else {
+          setUser(prev => ({ ...prev, credits: prev.credits - 1 }))
+        }
+      } else {
+        toast.error(data.message)
+        setPrompt(promptCopy)
+      }
+
+    } catch (error) {
+      toast.error(error.message)
+    }finally{
+      setPrompt('')
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -24,14 +55,14 @@ const ChatBox = () => {
     }
   }, [selectedChat])
 
-  useEffect(()=>{
-     if (containerRef.current) {
+  useEffect(() => {
+    if (containerRef.current) {
       containerRef.current.scrollTo({
-        top:containerRef.current.scrollHeight,
-        behavior:'smooth'
+        top: containerRef.current.scrollHeight,
+        behavior: 'smooth'
       })
-     }
-  },[messages])
+    }
+  }, [messages])
 
   return (
     <div className='flex-1 flex flex-col justify-between m-5 md:m-10 xl:mx-30 max-md:mt-14 2xl:pr-40 '>
@@ -62,9 +93,9 @@ const ChatBox = () => {
       {
         mode === 'image' && (
           <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
-              <p className='text-xs'>Publish Generated Image To Community</p>
-              <input onChange={(e) =>setIsPublished(e.target.checked) }
-               type="checkbox" className='cursor-pointer ' checked={isPublished} />
+            <p className='text-xs'>Publish Generated Image To Community</p>
+            <input onChange={(e) => setIsPublished(e.target.checked)}
+              type="checkbox" className='cursor-pointer ' checked={isPublished} />
           </label>
         )
       }
@@ -75,7 +106,7 @@ const ChatBox = () => {
           <option className='dark:bg-purple-900' value="text">Text</option>
           <option className='dark:bg-purple-900' value="image">Image</option>
         </select>
-        <input onChange={(e) => setPromt(e.target.value)} value={promt}
+        <input onChange={(e) => setPrompt(e.target.value)} value={prompt}
           type="text" placeholder='Type your promt here...' className='w-full flex-1 text-sm outline-none' required />
         <button disabled={loading}>
           <img src={loading ? assets.stop_icon : assets.send_icon} alt="" className='w-8 cursor-pointer' />
