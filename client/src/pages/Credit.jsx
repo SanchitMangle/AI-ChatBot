@@ -6,69 +6,85 @@ import toast from 'react-hot-toast'
 const Credit = () => {
 
 
-  const [plans,setPlans] = useState([])
-  const [loading,setLoading] = useState(true)
-  const {axios,token} = useAppContext()
+  const [plans, setPlans] = useState([])
+  const [loading, setLoading] = useState(true)
+  const { axios, token } = useAppContext()
 
   const fetchPlans = async () => {
     try {
-      const {data} = await axios.get('/api/credit/plan',{ headers: { AUthorization: token } })
+      const { data } = await axios.get('/api/credit/plan', { headers: { AUthorization: token } })
       if (data.success) {
         setPlans(data.plans)
-      }else{
+      } else {
         toast.error(data.message || 'Failed to fetch plans')
       }
     } catch (error) {
-      toast.error(error.message )
+      toast.error(error.message)
     }
     setLoading(false)
   }
 
   const purchasePlan = async (planId) => {
     try {
-      const {data} = await axios.post('/api/credit/purchase',{planId},{headers: { AUthorization: token }})
-      if(data.success){
+      const { data } = await axios.post('/api/credit/purchase', { planId }, { headers: { AUthorization: token } })
+      if (data.success) {
         window.location.href = data.url
-      }else{
+      } else {
         toast.error(data.message)
       }
     } catch (error) {
-       toast.error(error.message)
+      toast.error(error.message)
     }
   }
 
-  useEffect(()=>{
-       fetchPlans()
-  },[])
+  useEffect(() => {
+    fetchPlans()
+  }, [])
 
-  if(loading) return <Loading/>
+  if (loading) return <Loading />
 
   return (
-    <div className='max-w-7xl h-screen overflow-y-scroll mx-auto px-4 sm:px-6 lg:px-8 py-12 tex'>
-    <h2 className='text-3xl font-semibold text-center mb-10 xl:mt-30 text-gray-800 dark:text-white'>Credit Plans</h2>  
-     <div className='flex flex-wrap justify-center gap-8'>
-         {
-          plans.map((plan)=>(
-            <div key={plan._id} className={`border border-gray-200 dark:border-purple-700 rounded-lg shadow hover:shadow-lg transition-shadow p-6 min-w[300px] flex flex-col ${plan._id === 'pro' ? 'bg-purple-50 dark:bg-purple-900' : 'bg-white dark:bg-transparent' }`}>
-              <div className='flex-1 text-white'>
-               <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>{plan.name}</h3>
-               <p className='text-2xl font-bold text-purple-600 dark:text-purple-300'>${plan.price}
-                <span className='text-base font-normal text-gray-600 dark:text-purple-200'>{' '}/{plan.credits} Credits</span>
-               </p>
-               <ul className='list-disc list-inside text-sm text-gray-700 dark:text-white space-y-1'>
-                {
-                  plan.features.map((feature,index)=>(
-                    <li key={index}>{feature}</li>
-                  ))
-                }
-               </ul>
+    <div className='max-w-6xl w-full h-full overflow-y-auto mx-auto px-6 py-12'>
+      <div className='text-center mb-16 mt-8 xl:mt-20'>
+        <h2 className='text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-[#3D81F6] bg-clip-text text-transparent mb-4'>Choose Your Plan</h2>
+        <p className='text-gray-500 dark:text-gray-400 max-w-lg mx-auto'>Unlock the full potential of QuickGPT with our flexible credit plans designed for every need.</p>
+      </div>
+
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-8 pb-12'>
+        {
+          plans.map((plan) => (
+            <div key={plan._id} className={`group relative border border-gray-200 dark:border-white/10 rounded-3xl p-8 flex flex-col transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 ${plan._id === 'pro' ? 'bg-primary/5 dark:bg-primary/10 ring-2 ring-primary border-transparent' : 'bg-white dark:bg-white/5'}`}>
+
+              {plan._id === 'pro' && <span className='absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-purple-950 text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full'>Most Popular</span>}
+
+              <div className='flex-1'>
+                <h3 className='text-2xl font-bold mb-4'>{plan.name}</h3>
+                <div className='flex items-baseline gap-1 mb-8'>
+                  <span className='text-4xl font-bold'>${plan.price}</span>
+                  <span className='text-gray-500 dark:text-gray-400'>/ {plan.credits} Credits</span>
+                </div>
+
+                <ul className='space-y-4 mb-8'>
+                  {
+                    plan.features.map((feature, index) => (
+                      <li key={index} className='flex items-start gap-3 text-sm opacity-80'>
+                        <svg className='w-5 h-5 text-primary shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7'></path></svg>
+                        {feature}
+                      </li>
+                    ))
+                  }
+                </ul>
               </div>
-               <button onClick={() => toast.promise(purchasePlan(plan._id),{loading:"Processing..."})}
-               className='mt-6 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-medium py-2 rounded transition-color cursor-pointer'>Buy Now</button>
+
+              <button
+                onClick={() => toast.promise(purchasePlan(plan._id), { loading: "Redirecting to checkout..." })}
+                className={`w-full py-4 rounded-xl font-bold transition-all cursor-pointer ${plan._id === 'pro' ? 'bg-primary text-purple-950 shadow-lg shadow-primary/20 hover:opacity-90' : 'bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20'}`}>
+                Get Started
+              </button>
             </div>
           ))
-         }
-     </div>
+        }
+      </div>
     </div>
   )
 }

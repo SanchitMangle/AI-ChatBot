@@ -43,7 +43,7 @@ const ChatBox = () => {
 
     } catch (error) {
       toast.error(error.message)
-    }finally{
+    } finally {
       setPrompt('')
       setLoading(false)
     }
@@ -68,50 +68,69 @@ const ChatBox = () => {
     <div className='flex-1 flex flex-col justify-between m-5 md:m-10 xl:mx-30 max-md:mt-14 2xl:pr-40 '>
 
       {/* Chat Messages */}
-      <div ref={containerRef} className='flex-1 mb-5 overflow-x-scroll'>
+      <div ref={containerRef} className='flex-1 mb-5 overflow-y-auto pr-2 scroll-smooth'>
         {messages.length === 0 && (
-          <div className='h-full flex flex-col items-center justify-center gap-2 text-primary'>
-            <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark} className='w-full max-w-56 sm:max-w-68' alt="" />
-            <p className='mt-5 text-4xl sm:text-6xl text-center text-gray-400 dark:text-white'>Ask me anything </p>
+          <div className='h-full flex flex-col items-center justify-center gap-6 text-primary'>
+            <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark} className='w-full max-w-56 sm:max-w-68 opacity-80 hover:opacity-100 transition-opacity' alt="QuickGPT Logo" />
+            <p className='text-3xl sm:text-5xl font-semibold text-center text-gray-400 dark:text-white/80'>Ask me anything </p>
           </div>
         )}
 
-        {messages.map((message, index) => <Message key={index} message={message} />)}
+        <div className='space-y-6'>
+          {messages.map((message, index) => <Message key={index} message={message} />)}
+        </div>
 
-        {/* Loading staet tree dots */}
-
+        {/* Loading state three dots */}
         {
-          loading && <div className='loader flex items-center gap-1.5'>
-            <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
-            <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
-            <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
+          loading && <div className='loader flex items-center gap-1.5 mt-4 ml-2'>
+            <div className='w-2 h-2 rounded-full bg-primary/60 dark:bg-white/60 animate-bounce'></div>
+            <div className='w-2 h-2 rounded-full bg-primary/60 dark:bg-white/60 animate-bounce [animation-delay:-0.15s]'></div>
+            <div className='w-2 h-2 rounded-full bg-primary/60 dark:bg-white/60 animate-bounce [animation-delay:-0.3s]'></div>
           </div>
         }
 
       </div>
 
-      {
-        mode === 'image' && (
-          <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
-            <p className='text-xs'>Publish Generated Image To Community</p>
-            <input onChange={(e) => setIsPublished(e.target.checked)}
-              type="checkbox" className='cursor-pointer ' checked={isPublished} />
-          </label>
-        )
-      }
+      <div className='max-w-3xl w-full mx-auto'>
+        {
+          mode === 'image' && (
+            <label className='inline-flex items-center gap-2 mb-4 text-xs mx-auto cursor-pointer text-gray-500 hover:text-primary transition-colors'>
+              <input onChange={(e) => setIsPublished(e.target.checked)}
+                type="checkbox" className='cursor-pointer accent-primary' checked={isPublished} />
+              <span>Publish Generated Image To Community</span>
+            </label>
+          )
+        }
 
-      {/* Promt Input Box */}
-      <form onSubmit={onSubmitHandler} className='bg-primary/20 dark:bg-[#583c79]/30 border border-primary dark:border-[#80609F]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center '>
-        <select onChange={(e) => setMode(e.target.value)} value={mode} className='text-sm pl-3 pr-2 outline-none'>
-          <option className='dark:bg-purple-900' value="text">Text</option>
-          <option className='dark:bg-purple-900' value="image">Image</option>
-        </select>
-        <input onChange={(e) => setPrompt(e.target.value)} value={prompt}
-          type="text" placeholder='Type your promt here...' className='w-full flex-1 text-sm outline-none' required />
-        <button disabled={loading}>
-          <img src={loading ? assets.stop_icon : assets.send_icon} alt="" className='w-8 cursor-pointer' />
-        </button>
-      </form>
+        {/* Prompt Input Box */}
+        <form onSubmit={onSubmitHandler} className='bg-primary/5 dark:bg-white/5 border border-primary/20 dark:border-white/10 rounded-2xl w-full p-2 pl-4 flex gap-3 items-center backdrop-blur-md focus-within:ring-2 focus-within:ring-primary/30 transition-all'>
+          <select
+            onChange={(e) => setMode(e.target.value)}
+            value={mode}
+            className='text-xs font-medium bg-transparent border-r border-gray-300 dark:border-white/10 pr-3 outline-none cursor-pointer hover:text-primary transition-colors'
+            aria-label="Select generation mode">
+            <option className='dark:bg-[#1a1a1a]' value="text">Text</option>
+            <option className='dark:bg-[#1a1a1a]' value="image">Image</option>
+          </select>
+          <input
+            onChange={(e) => setPrompt(e.target.value)}
+            value={prompt}
+            type="text"
+            placeholder={mode === 'image' ? 'Describe the image you want...' : 'Type your message here...'}
+            className='w-full flex-1 text-sm bg-transparent outline-none py-2'
+            required
+            aria-label="Prompt input"
+          />
+          <button
+            disabled={loading}
+            type="submit"
+            className='p-2 bg-primary dark:bg-white rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all cursor-pointer'
+            aria-label={loading ? "Stop Generating" : "Send Message"}>
+            <img src={loading ? assets.stop_icon : assets.send_icon} alt="" className='w-6 h-6 not-dark:invert' />
+          </button>
+        </form>
+        <p className='text-[10px] text-center mt-3 text-gray-500 opacity-60'>QuickGPT can provide helpful responses but may occasionally be inaccurate.</p>
+      </div>
 
     </div>
   )
