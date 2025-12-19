@@ -34,7 +34,7 @@ export const AppProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const { data } = await axios.get('/api/user/data', { headers: { Authorization: token } })
+            const { data } = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
             if (data.success) {
                 setUser(data.user)
             }
@@ -53,7 +53,7 @@ export const AppProvider = ({ children }) => {
         try {
             if (!user) return toast('Login to create a new chat')
             navigate('/')
-            await axios.get('/api/chat/create', { headers: { Authorization: token } })
+            await axios.get('/api/chat/create', { headers: { Authorization: `Bearer ${token}` } })
             await fetchUserChats()
         } catch (error) {
             toast.error(error.message)
@@ -62,7 +62,7 @@ export const AppProvider = ({ children }) => {
 
     const fetchUserChats = async () => {
         try {
-            const { data } = await axios.get('/api/chat/get', { headers: { Authorization: token } })
+            const { data } = await axios.get('/api/chat/get', { headers: { Authorization: `Bearer ${token}` } })
             if (data.success) {
                 setChats(data.chats)
                 // If the users has no chats create one 
@@ -84,9 +84,9 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         if (token) {
-             fetchUser();
+            fetchUser();
         }
-        else{
+        else {
             setUser(null)
             setLoadingUser(false)
         }
@@ -109,8 +109,8 @@ export const AppProvider = ({ children }) => {
         navigate, user, setUser, fetchUser,
         chats, setChats, selectedChat,
         setSelectedChat, theme, setTheme,
-        createNewChats,loadingUser,fetchUserChats,
-        token,setToken,axios
+        createNewChats, loadingUser, fetchUserChats,
+        token, setToken, axios
     }
 
     return (

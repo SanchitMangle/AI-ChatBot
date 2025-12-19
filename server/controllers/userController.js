@@ -15,19 +15,34 @@ const generateToken = (id) => {
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ success: false, message: "Missing Details" })
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, message: "Invalid Email Format" })
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" })
+        }
+
         const userExist = await User.findOne({ email })
 
         if (userExist) {
-            return res.json({ success: false, message: "User Already Exists" })
+            return res.status(400).json({ success: false, message: "User Already Exists" })
         }
 
         const user = await User.create({ name, email, password });
         const token = generateToken(user._id)
-        res.json({ success: true, token })
+        res.status(201).json({ success: true, token })
 
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: error.message })
+        res.status(500).json({ success: false, message: error.message })
     }
 }
 
@@ -35,21 +50,26 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "Email and password are required" })
+        }
+
         const user = await User.findOne({ email })
 
         if (user) {
             const isMatch = await bcrypt.compare(password, user.password)
             if (isMatch) {
                 const token = generateToken(user._id)
-                res.json({ success: true, token })
+                return res.json({ success: true, token })
             }
         }
 
-        return res.json({ success: false, message: 'Invalid email or password' })
+        return res.status(401).json({ success: false, message: 'Invalid email or password' })
 
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: error.message })
+        res.status(500).json({ success: false, message: error.message })
     }
 }
 
