@@ -12,7 +12,7 @@ const Credit = () => {
 
   const fetchPlans = async () => {
     try {
-      const { data } = await axios.get('/api/credit/plan', { headers: { AUthorization: token } })
+      const { data } = await axios.get('/api/credit/plan', { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
         setPlans(data.plans)
       } else {
@@ -26,7 +26,7 @@ const Credit = () => {
 
   const purchasePlan = async (planId) => {
     try {
-      const { data } = await axios.post('/api/credit/purchase', { planId }, { headers: { AUthorization: token } })
+      const { data } = await axios.post('/api/credit/purchase', { planId }, { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
         window.location.href = data.url
       } else {
