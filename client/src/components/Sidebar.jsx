@@ -10,7 +10,6 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   const [search, setSearch] = useState('')
 
   const logout = () => {
-    localStorage.removeItem('token')
     setToken(null)
     toast.success("Logged out Successfully")
   }
@@ -21,7 +20,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       const conform = window.confirm('Are you sure want to delete this chat?')
       if (!conform) return
 
-      const { data } = await axios.post('/api/chat/delete', { chatId }, { headers: { AUthorization: token } })
+      const { data } = await axios.post('/api/chat/delete', { chatId }, { headers: { Authorization: `Bearer ${token}` } })
 
       if (data.success) {
         setChats(prev => prev.filter(chat => chat._id !== chatId))

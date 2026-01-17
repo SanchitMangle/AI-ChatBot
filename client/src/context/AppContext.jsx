@@ -84,9 +84,11 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         if (token) {
+            localStorage.setItem('token', token);
             fetchUser();
         }
         else {
+            localStorage.removeItem('token');
             setUser(null)
             setLoadingUser(false)
         }
